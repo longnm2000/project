@@ -7,9 +7,8 @@ import slide4 from "../../assets/images/slide4.webp";
 import slide5 from "../../assets/images/slide5.webp";
 import slide6 from "../../assets/images/slide6.webp";
 import Typography from "@mui/material/Typography";
-import { Box, Grid, Container } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import "./SliderComp.css";
-import { Image } from "@mui/icons-material";
 function SliderComp() {
   const settings = {
     slidesToScroll: 1,
@@ -54,8 +53,8 @@ function SliderComp() {
   }, []);
 
   return (
-    <Container>
-      <Grid container className="bg-color-white">
+    <>
+      <Grid container className="bg-color-white" marginBottom={3}>
         <Grid item xs={12}>
           <Slider asNavFor={nav2} ref={slider1}>
             <Box>
@@ -122,7 +121,7 @@ function SliderComp() {
           </Slider>
         </Grid>
       </Grid>
-    </Container>
+    </>
   );
 }
 

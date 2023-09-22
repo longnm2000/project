@@ -178,7 +178,7 @@ function Footer() {
                   <Box width={30}>
                     {" "}
                     <Typography align="center">
-                      <i class="fa-solid fa-credit-card"></i>
+                      <i className="fa-solid fa-credit-card"></i>
                     </Typography>
                   </Box>
                 </Grid>
@@ -217,7 +217,7 @@ function Footer() {
                   <Box width={30}>
                     {" "}
                     <Typography align="center">
-                      <i class="fa-solid fa-circle-info"></i>
+                      <i className="fa-solid fa-circle-info"></i>
                     </Typography>
                   </Box>
                 </Grid>
