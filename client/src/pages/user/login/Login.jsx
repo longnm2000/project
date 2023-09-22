@@ -15,6 +15,7 @@ import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import Swal from "sweetalert2";
+import Header from "../../../components/header/Header";
 const defaultTheme = createTheme();
 
 const schema = yup.object().shape({
@@ -44,6 +45,7 @@ export default function Login() {
     resolver: yupResolver(schema),
   });
   const onSubmit = (data) => {
+    console.log(data);
     try {
       axios
         .post("http://localhost:8080/api/v1/auth/sign-in", data)
@@ -96,98 +98,109 @@ export default function Login() {
     }
   };
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <Grid container component="main" sx={{ height: "100vh" }}>
-        <CssBaseline />
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
-          sx={{
-            backgroundImage:
-              "url(https://source.unsplash.com/random?wallpapers)",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: (t) =>
-              t.palette.mode === "light"
-                ? t.palette.grey[50]
-                : t.palette.grey[900],
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-          <Box
+    <>
+      <Header />
+      <ThemeProvider theme={defaultTheme}>
+        <Grid container component="main" sx={{ height: "100vh" }}>
+          <CssBaseline />
+          <Grid
+            item
+            xs={false}
+            sm={4}
+            md={7}
             sx={{
-              my: 8,
-              mx: 4,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              backgroundImage:
+                "url(https://source.unsplash.com/random?wallpapers)",
+              backgroundRepeat: "no-repeat",
+              backgroundColor: (t) =>
+                t.palette.mode === "light"
+                  ? t.palette.grey[50]
+                  : t.palette.grey[900],
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }}
+          />
+          <Grid
+            item
+            xs={12}
+            sm={8}
+            md={5}
+            component={Paper}
+            elevation={6}
+            square
           >
-            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Đăng nhập
-            </Typography>
             <Box
-              component="form"
-              noValidate
-              onSubmit={handleSubmit(onSubmit)}
-              sx={{ mt: 1 }}
+              sx={{
+                my: 8,
+                mx: 4,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              <Controller
-                name="email"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    margin="normal"
-                    label="Email"
-                    error={!!errors.email}
-                    helperText={errors.email?.message}
-                  />
-                )}
-              />
-              <Controller
-                name="password"
-                control={control}
-                defaultValue=""
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Mật khẩu"
-                    type="password"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    margin="normal"
-                  />
-                )}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-              >
+              <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+                <LockOutlinedIcon />
+              </Avatar>
+              <Typography component="h1" variant="h5">
                 Đăng nhập
-              </Button>
-              <Grid container justifyContent={"flex-end"}>
-                <Grid item>
-                  <Button component={Link} to={"/register"}>
-                    Không có tài khoản? Đăng ký
-                  </Button>
+              </Typography>
+              <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmit(onSubmit)}
+                sx={{ mt: 1 }}
+              >
+                <Controller
+                  name="email"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      margin="normal"
+                      label="Email"
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="password"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Mật khẩu"
+                      type="password"
+                      error={!!errors.password}
+                      helperText={errors.password?.message}
+                      margin="normal"
+                    />
+                  )}
+                />
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                >
+                  Đăng nhập
+                </Button>
+                <Grid container justifyContent={"flex-end"}>
+                  <Grid item>
+                    <Button component={Link} to={"/register"}>
+                      Không có tài khoản? Đăng ký
+                    </Button>
+                  </Grid>
                 </Grid>
-              </Grid>
+              </Box>
             </Box>
-          </Box>
+          </Grid>
         </Grid>
-      </Grid>
-    </ThemeProvider>
+      </ThemeProvider>
+    </>
   );
 }

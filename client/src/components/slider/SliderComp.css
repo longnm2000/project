@@ -1,0 +1,10 @@
+.l-slider .slick-slide:hover {
+    font-weight: bolder;
+    color: red;
+    cursor: pointer;
+}
+
+.l-slider .slick-current {
+    color: red;
+    border-bottom: 2px solid red;
+}

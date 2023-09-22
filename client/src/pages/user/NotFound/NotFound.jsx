@@ -1,9 +1,11 @@
 import { Grid, Typography } from "@mui/material";
 import React from "react";
+import Header from "../../../components/header/Header";
 
 function NotFound() {
   return (
     <>
+      <Header />
       <Grid>
         <Grid item>
           <Typography
