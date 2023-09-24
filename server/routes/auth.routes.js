@@ -12,7 +12,7 @@ router.post("/sign-up", signUp);
 
 router.post("/sign-in", signIn);
 
-// router.post("/admin/sign-in-admin", signInAdmin);
-// router.post("/admin/sign-up-admin", signupAdmin);
+router.post("/admin/sign-in", signInAdmin);
+// router.post("/admin/sign-up", signupAdmin);
 
 module.exports = router;

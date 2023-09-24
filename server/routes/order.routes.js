@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { findAll, findOneById } = require("../controllers/product.controller");
+const { addOrder } = require("../controllers/order.controller");
 const { isLogin } = require("../middlewares/isLogin.middleware");
 
-router.get("/", findAll);
-router.get("/:id", findOneById);
+router.post("/", isLogin, addOrder);
+
 module.exports = router;

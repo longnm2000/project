@@ -30,7 +30,7 @@ module.exports.create = (
 module.exports.update = (userId, isLogin) => {
   console.log(userId, isLogin);
   return db.execute(
-    "UPDATE `db_fpt`.`users` SET `is_login` = ? WHERE (`user_id` = ?)",
+    "UPDATE `db_fpt`.`users` SET `isLogin` = ? WHERE (`userId` = ?)",
     [isLogin, userId]
   );
 };

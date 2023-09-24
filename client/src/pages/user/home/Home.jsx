@@ -11,7 +11,7 @@ function Home() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/v1/laptop");
+      const response = await axios.get("http://localhost:8080/api/v1/laptops");
       if (response.data) {
         setData(response.data.products);
       }
@@ -22,7 +22,6 @@ function Home() {
   useEffect(() => {
     fetchData();
   }, []);
-  console.log(data);
   return (
     <>
       <Header />

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { Box, Grid } from "@mui/material";
 function SliderProductImage({ images }) {
-  console.log(images);
   const settings = {
     slidesToScroll: 1,
     autoplay: true,
@@ -68,9 +67,9 @@ function SliderProductImage({ images }) {
             className="l-slider"
           >
             {images?.map((e, i) => (
-              <Box key={images}>
+              <div key={i}>
                 <img src={e.source} alt="" width={"100%"} />
-              </Box>
+              </div>
             ))}
           </Slider>
         </Grid>

@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -11,13 +10,56 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
-
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import jwtDecode from "jwt-decode";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Swal from "sweetalert2";
 function Header() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+  const [anchorElUser, setAnchorElUser] = useState(null);
+  const [userName, setUserName] = useState("");
+  let decoded = null;
+  if (localStorage.getItem("token")) {
+    decoded = jwtDecode(localStorage.getItem("token"));
+  }
+  useEffect(() => {
+    if (!!decoded) {
+      setUserName(decoded.data.lastName + " " + decoded.data.firstName);
+    }
+  }, []);
+  const navigate = useNavigate();
+
+  function stringToColor(string) {
+    let hash = 0;
+    let i;
+
+    /* eslint-disable no-bitwise */
+    for (i = 0; i < string.length; i += 1) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    let color = "#";
+
+    for (i = 0; i < 3; i += 1) {
+      const value = (hash >> (i * 8)) & 0xff;
+      color += `00${value.toString(16)}`.slice(-2);
+    }
+    /* eslint-enable no-bitwise */
+
+    return color;
+  }
+
+  function stringAvatar(name) {
+    return {
+      sx: {
+        bgcolor: stringToColor(name),
+      },
+      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+    };
+  }
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -32,6 +74,21 @@ function Header() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+  };
+
+  const handleLogOut = () => {
+    handleCloseUserMenu();
+    setUserName("");
+    localStorage.removeItem("token");
+    Swal.fire({
+      icon: "success",
+      title: "Đã đăng xuất thành công",
+      timer: 2000,
+    });
+  };
+  const handleLogin = () => {
+    handleCloseUserMenu();
+    navigate("/login");
   };
 
   return (
@@ -133,13 +190,32 @@ function Header() {
               Laptop
             </Button>
           </Box>
-          <IconButton size="large" aria-label="search" color="inherit">
-            <SearchIcon />
-          </IconButton>
+          <Box display={"flex"} gap={1} marginRight={1}>
+            <IconButton size="large" aria-label="search" color="inherit">
+              <SearchIcon />
+            </IconButton>
+            <IconButton
+              size="large"
+              aria-label="search"
+              color="inherit"
+              component={Link}
+              to={"/cart"}
+            >
+              <ShoppingCartIcon />
+            </IconButton>
+          </Box>
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              <IconButton
+                onClick={handleOpenUserMenu}
+                sx={{ p: 0 }}
+                color="inherit"
+              >
+                {userName === "" ? (
+                  <AccountCircleIcon sx={{ fontSize: 30 }} />
+                ) : (
+                  <Avatar {...stringAvatar(userName)} />
+                )}
               </IconButton>
             </Tooltip>
             <Menu
@@ -158,9 +234,15 @@ function Header() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography textAlign="center">Đăng xuất</Typography>
-              </MenuItem>
+              {userName === "" ? (
+                <MenuItem onClick={handleLogin}>
+                  <Typography textAlign="center">Đăng nhập</Typography>
+                </MenuItem>
+              ) : (
+                <MenuItem onClick={handleLogOut}>
+                  <Typography textAlign="center">Đăng xuất</Typography>
+                </MenuItem>
+              )}
             </Menu>
           </Box>
         </Toolbar>

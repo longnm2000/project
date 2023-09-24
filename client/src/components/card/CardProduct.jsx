@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
 import "./CardProduct.css";
 import { Link } from "react-router-dom";
+import numeral from "numeral";
 function CardProduct({ product }) {
   return (
     <Link to={`/laptop/${product.productId}`} className="card-link">
@@ -17,7 +18,7 @@ function CardProduct({ product }) {
             {product.productName}
           </Typography>
           <Typography variant="h6" color="red">
-            {product.price} đ
+            {numeral(product.price).format("0, ")} VND
           </Typography>
           <Typography>
             <b>CPU:</b> {product.cpu}
