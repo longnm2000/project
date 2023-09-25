@@ -10,6 +10,7 @@ import AdminLogin from "./pages/admin/AdminLogin/AdminLogin";
 import UsersManager from "./pages/admin/UsersManager/UsersManager";
 import OrdersManager from "./pages/admin/OrderManager/OrderManager";
 import LaptopsManager from "./pages/admin/LaptopsManager/LaptopsManager";
+import AddProduct from "./pages/admin/AddProduct/AddProduct";
 function App() {
   const navigate = useNavigate();
   const scrollToTop = () => {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/admin/users" element={<UsersManager />} />
         <Route path="/admin/orders" element={<OrdersManager />} />
         <Route path="/admin/laptops" element={<LaptopsManager />} />
+        <Route path="/admin/laptops/add" element={<AddProduct />} />
       </Routes>
     </div>
   );

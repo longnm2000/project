@@ -45,3 +45,17 @@ module.exports.deleteProduct = async (req, res) => {
     });
   }
 };
+
+module.exports.findAllManufacturers = async (req, res) => {
+  try {
+    const [result] = await productServices.findAllManufacturers();
+    res.status(200).json({
+      status: "success",
+      manufacturers: result,
+    });
+  } catch (error) {
+    res.json({
+      error,
+    });
+  }
+};

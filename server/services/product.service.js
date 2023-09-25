@@ -27,3 +27,7 @@ module.exports.findProductImages = (id) => {
 module.exports.deleteProduct = (id) => {
   return db.execute(`DELETE FROM products WHERE productId = ?`, [id]);
 };
+
+module.exports.findAllManufacturers = () => {
+  return db.execute("SELECT * FROM db_project.manufacturers;");
+};
