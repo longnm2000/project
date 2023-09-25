@@ -34,3 +34,51 @@ module.exports.addOrder = async (req, res) => {
     });
   }
 };
+
+module.exports.findAllOrders = async (req, res) => {
+  try {
+    let data = await orderServices.findAllOrders();
+    let [rows] = data;
+
+    res.json({
+      status: "success",
+      orders: rows,
+    });
+  } catch (error) {
+    res.json({
+      error,
+    });
+  }
+};
+
+module.exports.findOneOrderDetail = async (req, res) => {
+  let { id } = req.params;
+  try {
+    let data = await orderServices.findOneOrderDetail(+id);
+    let [rows] = data;
+
+    res.json({
+      status: "success",
+      orderDetail: rows,
+    });
+  } catch (error) {
+    res.json({
+      error,
+    });
+  }
+};
+
+module.exports.updateStatus = async (req, res) => {
+  let { id } = req.params;
+  let { value } = req.body;
+  try {
+    await orderServices.updateStatus(+value, +id);
+    res.status(200).json({
+      message: "Update status login successfully",
+    });
+  } catch (error) {
+    res.json({
+      error,
+    });
+  }
+};

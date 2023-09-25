@@ -17,28 +17,34 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 // import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../../components/ListItems/listItems";
-import FacebookIcon from "@mui/icons-material/Facebook";
+// import FacebookIcon from "@mui/icons-material/Facebook";
 // import Chart from './Chart';
 // import Deposits from "../../../components/Deposits/Deposits";
 // import Orders from "../../../components/Orders/Orders";
 import { useNavigate } from "react-router-dom";
+
+// import Dropdown from "react-bootstrap/Dropdown";
+// import DropdownButton from "react-bootstrap/DropdownButton";
+
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Title from "../../../components/Title/Title";
-import { Helmet } from "react-helmet";
-// import Dropdown from "react-bootstrap/Dropdown";
-// import DropdownButton from "react-bootstrap/DropdownButton";
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 // import Button from "react-bootstrap/Button";
 // import Modal from "react-bootstrap/Modal";
-// import { DataGrid } from "@mui/x-data-grid";
+
+import { Helmet } from "react-helmet";
 import TablePagination from "@mui/material/TablePagination";
 import jwtDecode from "jwt-decode";
-import moment from "moment";
+// import { Col, Row } from "react-bootstrap";
+import numeral from "numeral";
+// import Form from "react-bootstrap/Form";
+
 import Menu from "@mui/material/Menu";
 import Tooltip from "@mui/material/Tooltip";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -51,24 +57,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import Select from "@mui/material/Select";
+import moment from "moment";
 
 const drawerWidth = 240;
 
@@ -119,60 +109,61 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-function UsersManager() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(true);
+export default function OrdersManager() {
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [userName, setUserName] = useState("");
   let decoded = null;
   if (localStorage.getItem("admin_token")) {
     decoded = jwtDecode(localStorage.getItem("admin_token"));
   }
+
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
   };
   const handleExit = () => {
-    localStorage.removeItem("admin_token");
-    navigate("/admin/login");
+    localStorage.removeItem("admin");
+    navigate("/admin/login-admin");
   };
 
-  const [users, setUsers] = useState(null);
+  const [orders, setOrders] = useState(null);
+  const [selectedOrderStatus, setSelectedOrderStatus] = useState(0);
+
   const fetchData = async () => {
     await axios
-      .get(`http://localhost:8080/api/v1/users`)
-      .then((res) => setUsers(res.data.users))
-      .catch((err) => console.log(err));
+      .get("http://localhost:8080/api/v1/orders")
+      .then((res) => setOrders(res.data.orders))
+      .catch((error) => console.log(error));
+  };
+
+  const loadName = (decoded) => {
+    if (!!decoded) {
+      setUserName(decoded.data.name);
+    }
   };
 
   useEffect(() => {
     fetchData();
-    if (!!decoded) {
-      setUserName(decoded.data.name);
-    }
+    loadName(decoded);
   }, []);
 
-  const handleChangeStatus = async (user) => {
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
+
+  const handleOrderDetail = async (order) => {
+    setSelectedOrder(order);
     await axios
-      .patch(`http://localhost:8080/api/v1/users/${user.userId}`, {
-        isLogin: user.isLogin === 1 ? 0 : 1,
-      })
-      .then((res) => {
-        fetchData();
-        console.log(res.data);
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const [selectedUser, setSelectedUser] = useState(null);
-  const handlePostDetail = (user) => {
-    setSelectedUser(user);
+      .get(`http://localhost:8080/api/v1/orders/${order.orderId}`)
+      .then((res) => setSelectedOrderDetail(res.data.orderDetail))
+      .catch((error) => console.log(error));
     handleShow();
   };
+  console.log(selectedOrderDetail);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -185,6 +176,29 @@ function UsersManager() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleChange = (value, id) => {
+    Swal.fire({
+      title: "Are you sure?",
+
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .patch(`http://localhost:8080/api/v1/orders/${id}`, { value: value })
+          .then((res) => {
+            if (res.status === 200) {
+              Swal.fire({ icon: "success", title: "success", timer: 2000 });
+              fetchData();
+            }
+          })
+          .catch((error) => console.log(error));
+      }
+    });
   };
 
   const handleOpenUserMenu = (event) => {
@@ -244,79 +258,116 @@ function UsersManager() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <Helmet>
-        <title>Users Manager</title>
+        <title>Orders Manager</title>
       </Helmet>
-      <>
-        {/* <Modal show={show} onHide={handleClose} className="py-5">
-          <Modal.Header closeButton>
-            <Modal.Title>User Detail</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {!!selectedUser ? (
-              <div>
-                <p>ID: {selectedUser.user_id}</p>
-                <p>Name: {selectedUser.name}</p>
-                <p>Email: {selectedUser.email}</p>
-                <p>Birthday: {selectedUser.birthday}</p>
-                <p>
-                  Gender:{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </p>
-              </div>
-            ) : (
-              <></>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-        <Dialog open={show} onClose={handleClose}>
-          <DialogTitle>User Detail</DialogTitle>
-          <DialogContent>
-            {!!selectedUser ? (
-              <div>
-                <DialogContentText>
-                  <b>ID:</b> {selectedUser.userId}
-                </DialogContentText>
-                <DialogContentText>
-                  <b> Name:</b> {selectedUser.firstName} {selectedUser.lastName}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Email:</b> {selectedUser.email}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Birthday:</b> {selectedUser.birthday}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Gender:</b>{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Phone Number:</b> {selectedUser.phone}
-                </DialogContentText>
-              </div>
-            ) : (
-              <></>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
+      <Dialog
+        open={show}
+        onClose={handleClose}
+        fullScreen
+        aria-labelledby="contained-modal-title-vcenter"
+        PaperProps={{
+          sx: {
+            borderRadius: "8px",
+            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            backgroundColor: "#f0f0f0",
+            borderBottom: "1px solid #ddd",
+            padding: "16px",
+          }}
+        >
+          Order Detail
+        </DialogTitle>
+        <DialogContent sx={{ padding: "16px" }}>
+          {selectedOrder && (
+            <>
+              <Typography variant="subtitle1" gutterBottom>
+                Order ID: {selectedOrder.orderId}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                User ID: {selectedOrder.userId}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                User Name: {selectedOrder.lastName} {selectedOrder.firstName}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                Order Date: {selectedOrder.order_date}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                Total Amount: {numeral(selectedOrder.totalAmount).format("0,")}{" "}
+                đ
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                Shipping Address: {selectedOrder.shippingAddress}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                Order Status:{" "}
+                {selectedOrder.status === 0
+                  ? "Pending"
+                  : selectedOrder.status === 1
+                  ? "Delivery"
+                  : selectedOrder.status === 2
+                  ? "Completed"
+                  : "Canceled"}
+              </Typography>
+              <Typography variant="h6" gutterBottom>
+                Products:
+              </Typography>
+              {selectedOrderDetail?.map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt=""
+                    width="80px"
+                    height="auto"
+                    style={{ marginRight: "16px" }}
+                  />
+                  <div>
+                    <Typography variant="subtitle1" className="fw-bold">
+                      {item.productName}
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">CPU:</span> {item.cpu} GB
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">GPU:</span> {item.card} GB
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">RAM:</span> {item.ram} GB
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">SSD:</span> {item.ssd} GB
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">Screen:</span> {item.screenSize}{" "}
+                      {item.screenResolution}
+                    </Typography>
+                    <Typography variant="body2">
+                      <span className="fw-bold">Quantity:</span> {item.quantity}
+                    </Typography>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button variant="contained" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
@@ -428,79 +479,83 @@ function UsersManager() {
                   className="overflow-x-auto bg-white"
                 >
                   <React.Fragment>
-                    <Title>Users</Title>
+                    <Title>Orders</Title>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
                           <TableCell>#</TableCell>
-                          <TableCell>First Name</TableCell>
-                          <TableCell>Last Name</TableCell>
-                          <TableCell>Email</TableCell>
-                          <TableCell>Birthday</TableCell>
-                          <TableCell>gender</TableCell>
-                          <TableCell>Status</TableCell>
+                          <TableCell>Order Id</TableCell>
+                          <TableCell>User Id</TableCell>
+                          <TableCell>User Name</TableCell>
+                          <TableCell>Order Time</TableCell>
+                          <TableCell>Total Amount (VND)</TableCell>
+                          <TableCell>Order Status</TableCell>
                           <TableCell>Action</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {users
+                        {orders
                           ?.slice(
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
                           )
-                          .map((e, i) => (
-                            <TableRow key={i}>
-                              <TableCell>{i + 1}</TableCell>
-                              <TableCell>{e.firstName}</TableCell>
-                              <TableCell>{e.lastName}</TableCell>
-                              <TableCell>{e.email}</TableCell>
+                          .map((order, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{index + 1}</TableCell>
+                              <TableCell>{order.orderId}</TableCell>
+                              <TableCell>{order.userId}</TableCell>
                               <TableCell>
-                                {moment(e.birthDate).format("DD/MM/YYYY")}
+                                {order.lastName} {order.firstName}
                               </TableCell>
                               <TableCell>
-                                {e.gender === 0
-                                  ? "Male"
-                                  : e.gender === 1
-                                  ? "Female"
-                                  : "Other"}
-                              </TableCell>
-                              <TableCell>
-                                {e.isLogin === 1 ? (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"green"}
-                                  >
-                                    Accept
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"error"}
-                                  >
-                                    Ignore
-                                  </Typography>
+                                {moment(order.orderDate).format(
+                                  "DD/MM/YYYY HH:mm:ss"
                                 )}
+                              </TableCell>
+                              <TableCell>
+                                {numeral(order.totalAmount).format("0,")}
+                              </TableCell>
+                              <TableCell>
+                                {order.status === 0
+                                  ? "Pending"
+                                  : order.status === 1
+                                  ? "Delivery"
+                                  : order.status === 2
+                                  ? "Completed"
+                                  : "Canceled"}
                               </TableCell>
                               <TableCell>
                                 <Box
                                   display={"flex"}
                                   flexDirection={"column"}
-                                  gap={2}
+                                  gap={1}
                                 >
                                   <Button
                                     variant="contained"
-                                    onClick={() => handlePostDetail(e)}
-                                    color="primary"
+                                    onClick={() => handleOrderDetail(order)}
+                                    className="w-100 mb-2"
                                   >
                                     Detail
                                   </Button>
-                                  <Button
-                                    variant="contained"
-                                    onClick={() => handleChangeStatus(e)}
-                                    color="error"
+
+                                  <Select
+                                    size="small"
+                                    value={order.status}
+                                    disabled={
+                                      order.status === 3 || order.status === 2
+                                    }
+                                    onChange={(e) =>
+                                      handleChange(
+                                        e.target.value,
+                                        order.orderId
+                                      )
+                                    }
                                   >
-                                    Change Status
-                                  </Button>
+                                    <MenuItem value={0}>Pending</MenuItem>
+                                    <MenuItem value={1}>Delivery</MenuItem>
+                                    <MenuItem value={2}>Completed</MenuItem>
+                                    <MenuItem value={3}>Canceled</MenuItem>
+                                  </Select>
                                 </Box>
                               </TableCell>
                             </TableRow>
@@ -510,7 +565,7 @@ function UsersManager() {
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
                       component="div"
-                      count={users?.length || 0}
+                      count={orders?.length || 0}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       onPageChange={handleChangePage}
@@ -526,5 +581,3 @@ function UsersManager() {
     </ThemeProvider>
   );
 }
-
-export default UsersManager;

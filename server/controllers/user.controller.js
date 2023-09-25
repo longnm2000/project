@@ -66,19 +66,3 @@ module.exports.update = async (req, res) => {
     });
   }
 };
-
-module.exports.remove = async (req, res) => {
-  let { id } = req.params;
-
-  try {
-    await userService.remove(+id);
-    res.json({
-      status: "success",
-      message: `Delete architect with id = ${id} successfully`,
-    });
-  } catch (error) {
-    res.json({
-      error,
-    });
-  }
-};

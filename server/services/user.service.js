@@ -30,11 +30,7 @@ module.exports.create = (
 module.exports.update = (userId, isLogin) => {
   console.log(userId, isLogin);
   return db.execute(
-    "UPDATE `db_fpt`.`users` SET `isLogin` = ? WHERE (`userId` = ?)",
+    "UPDATE `db_project`.`users` SET `isLogin` = ? WHERE (`userId` = ?)",
     [isLogin, userId]
   );
-};
-
-module.exports.remove = (id) => {
-  return db.execute("DELETE FROM users WHERE userId = ?", [id]);
 };

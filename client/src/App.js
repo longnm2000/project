@@ -8,6 +8,8 @@ import Detail from "./pages/user/detail/Detail";
 import Cart from "./pages/user/cart/Cart";
 import AdminLogin from "./pages/admin/AdminLogin/AdminLogin";
 import UsersManager from "./pages/admin/UsersManager/UsersManager";
+import OrdersManager from "./pages/admin/OrderManager/OrderManager";
+import LaptopsManager from "./pages/admin/LaptopsManager/LaptopsManager";
 function App() {
   const navigate = useNavigate();
   const scrollToTop = () => {
@@ -27,6 +29,8 @@ function App() {
         <Route path="*" element={<NotFound />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/users" element={<UsersManager />} />
+        <Route path="/admin/orders" element={<OrdersManager />} />
+        <Route path="/admin/laptops" element={<LaptopsManager />} />
       </Routes>
     </div>
   );

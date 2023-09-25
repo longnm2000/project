@@ -29,12 +29,12 @@ export const mainListItems = (
         <ListItemText primary="Orders" />
       </ListItemButton>
     </NavLink>
-    <NavLink to={"/admin/smartphones"}>
+    <NavLink to={"/admin/laptops"}>
       <ListItemButton>
         <ListItemIcon>
           <SourceIcon />
         </ListItemIcon>
-        <ListItemText primary="Smartphones" />
+        <ListItemText primary="Laptops" />
       </ListItemButton>
     </NavLink>
   </React.Fragment>

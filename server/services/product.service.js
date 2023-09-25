@@ -10,10 +10,11 @@ module.exports.findAll = () => {
     p.screenSize,
     p.screenResolution,
     p.refeshRate,
+    p.quantity,
     p.price,
 	pic.source AS productImage
 FROM products p
-JOIN pictures pic ON p.productId = pic.productId WHERE pic.type = 1 LIMIT 8;`);
+JOIN pictures pic ON p.productId = pic.productId WHERE pic.type = 1`);
 };
 
 module.exports.findOneById = (id) => {
@@ -21,4 +22,8 @@ module.exports.findOneById = (id) => {
 };
 module.exports.findProductImages = (id) => {
   return db.execute(`SELECT * FROM pictures WHERE productId = ?`, [id]);
+};
+
+module.exports.deleteProduct = (id) => {
+  return db.execute(`DELETE FROM products WHERE productId = ?`, [id]);
 };

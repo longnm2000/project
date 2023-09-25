@@ -30,3 +30,34 @@ module.exports.addOrderDetail = (orderDetailValues) => {
 
   return db.execute(sql, values);
 };
+
+module.exports.findAllOrders = () => {
+  return db.execute(
+    `SELECT o.*, u.firstName,u.lastName FROM orders o INNER JOIN users u ON o.userId = u.userId  order by status asc, orderDate desc`
+  );
+};
+module.exports.findOneOrderDetail = (id) => {
+  return db.execute(
+    `SELECT
+    o.*,
+    od.*,
+    u.userId,u.lastName, u.firstName
+FROM
+    orders o
+INNER JOIN
+    orderdetails od ON o.orderId = od.orderId
+INNER JOIN
+    users u ON o.userId = u.userId
+WHERE
+	o.orderId = ?
+`,
+    [id]
+  );
+};
+
+module.exports.updateStatus = (value, id) => {
+  return db.execute(`UPDATE orders SET status = ? WHERE orderId = ?`, [
+    value,
+    id,
+  ]);
+};

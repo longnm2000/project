@@ -51,7 +51,11 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-
+import numeral from "numeral";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import CreateIcon from "@mui/icons-material/Create";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 function Copyright(props) {
   return (
     <Typography
@@ -119,7 +123,7 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-function UsersManager() {
+function LaptopsManager() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(true);
   const [anchorElUser, setAnchorElUser] = useState(null);
@@ -136,11 +140,11 @@ function UsersManager() {
     navigate("/admin/login");
   };
 
-  const [users, setUsers] = useState(null);
+  const [data, setData] = useState(null);
   const fetchData = async () => {
     await axios
-      .get(`http://localhost:8080/api/v1/users`)
-      .then((res) => setUsers(res.data.users))
+      .get(`http://localhost:8080/api/v1/laptops`)
+      .then((res) => setData(res.data.products))
       .catch((err) => console.log(err));
   };
 
@@ -151,27 +155,18 @@ function UsersManager() {
     }
   }, []);
 
-  const handleChangeStatus = async (user) => {
-    await axios
-      .patch(`http://localhost:8080/api/v1/users/${user.userId}`, {
-        isLogin: user.isLogin === 1 ? 0 : 1,
-      })
-      .then((res) => {
-        fetchData();
-        console.log(res.data);
-      })
-      .catch((error) => console.error(error));
-  };
-
   const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [selectedUser, setSelectedUser] = useState(null);
-  const handlePostDetail = (user) => {
-    setSelectedUser(user);
+  const [selectLaptop, setSelectLaptop] = useState(null);
+  const handlePostDetail = async (laptop) => {
     handleShow();
+    const response = await axios.get(
+      `http://localhost:8080/api/v1/laptops/${laptop.productId}`
+    );
+    setSelectLaptop(response.data);
   };
 
   const [page, setPage] = useState(0);
@@ -241,82 +236,103 @@ function UsersManager() {
     };
   }
 
+  const handleDeleteProduct = (id) => {
+    Swal.fire({
+      icon: "warning",
+      title: "Are you sure?",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`http://localhost:8080/api/v1/laptops/${id}`)
+          .then((response) => {
+            if (response.status === 200) {
+              Swal.fire({
+                icon: "success",
+                timer: 2000,
+                title: "Delete the product successfully!",
+              });
+              fetchData();
+            }
+          })
+          .catch((error) =>
+            Swal.fire({
+              icon: "error",
+              title: error,
+            })
+          );
+      }
+    });
+  };
+
   return (
     <ThemeProvider theme={defaultTheme}>
       <Helmet>
-        <title>Users Manager</title>
+        <title>Laptops Manager</title>
       </Helmet>
-      <>
-        {/* <Modal show={show} onHide={handleClose} className="py-5">
-          <Modal.Header closeButton>
-            <Modal.Title>User Detail</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {!!selectedUser ? (
-              <div>
-                <p>ID: {selectedUser.user_id}</p>
-                <p>Name: {selectedUser.name}</p>
-                <p>Email: {selectedUser.email}</p>
-                <p>Birthday: {selectedUser.birthday}</p>
-                <p>
-                  Gender:{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </p>
-              </div>
-            ) : (
-              <></>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-        <Dialog open={show} onClose={handleClose}>
-          <DialogTitle>User Detail</DialogTitle>
-          <DialogContent>
-            {!!selectedUser ? (
-              <div>
-                <DialogContentText>
-                  <b>ID:</b> {selectedUser.userId}
-                </DialogContentText>
-                <DialogContentText>
-                  <b> Name:</b> {selectedUser.firstName} {selectedUser.lastName}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Email:</b> {selectedUser.email}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Birthday:</b> {selectedUser.birthday}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Gender:</b>{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Phone Number:</b> {selectedUser.phone}
-                </DialogContentText>
-              </div>
-            ) : (
-              <></>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
+
+      <Dialog open={show} onClose={handleClose} fullScreen>
+        <DialogTitle>Laptop Detail</DialogTitle>
+        <DialogContent>
+          {!!selectLaptop ? (
+            <>
+              <DialogContentText>
+                <b>ID:</b> {selectLaptop?.product?.productId}
+              </DialogContentText>
+              <DialogContentText>
+                <b> Name:</b> {selectLaptop?.product?.name}
+              </DialogContentText>
+              <DialogContentText>
+                <b>CPU:</b> {selectLaptop?.product?.cpu}
+              </DialogContentText>
+              <DialogContentText>
+                <b>GPU:</b> {selectLaptop?.product?.card}
+              </DialogContentText>
+              <DialogContentText>
+                <b>SSD:</b> {selectLaptop?.product?.ssd} GB
+              </DialogContentText>
+              <DialogContentText>
+                <b>RAM:</b> {selectLaptop?.product?.ram} GB{" "}
+                {selectLaptop?.product?.ramType}
+              </DialogContentText>
+              <DialogContentText>
+                <b>Screen:</b> {selectLaptop?.product?.screenSize} inches{" "}
+                {selectLaptop?.product?.screenResolution}{" "}
+                {selectLaptop?.product?.refeshRate} Hz
+              </DialogContentText>
+              <DialogContentText>
+                <b>Quantity:</b> {selectLaptop?.product?.quantity}
+              </DialogContentText>
+              <DialogContentText>
+                <b>Price:</b>{" "}
+                {numeral(selectLaptop?.product?.price).format("0,")} VND
+              </DialogContentText>
+              <DialogContentText>
+                <b>Images:</b>
+              </DialogContentText>
+              {selectLaptop?.images.map((e, i) => (
+                <img
+                  key={i}
+                  src={e.source}
+                  alt={selectLaptop.product.name}
+                  width={"300px"}
+                />
+              ))}
+            </>
+          ) : (
+            <></>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
@@ -428,22 +444,25 @@ function UsersManager() {
                   className="overflow-x-auto bg-white"
                 >
                   <React.Fragment>
-                    <Title>Users</Title>
+                    <Title>Laptops</Title>
+                    <Box>
+                      <Button variant="contained">
+                        <AddIcon />{" "}
+                      </Button>
+                    </Box>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
                           <TableCell>#</TableCell>
-                          <TableCell>First Name</TableCell>
-                          <TableCell>Last Name</TableCell>
-                          <TableCell>Email</TableCell>
-                          <TableCell>Birthday</TableCell>
-                          <TableCell>gender</TableCell>
-                          <TableCell>Status</TableCell>
+                          <TableCell>Name</TableCell>
+                          <TableCell>Image</TableCell>
+                          <TableCell>Quantity</TableCell>
+                          <TableCell>Price</TableCell>
                           <TableCell>Action</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {users
+                        {data
                           ?.slice(
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
@@ -451,55 +470,40 @@ function UsersManager() {
                           .map((e, i) => (
                             <TableRow key={i}>
                               <TableCell>{i + 1}</TableCell>
-                              <TableCell>{e.firstName}</TableCell>
-                              <TableCell>{e.lastName}</TableCell>
-                              <TableCell>{e.email}</TableCell>
+                              <TableCell>{e.productName}</TableCell>
                               <TableCell>
-                                {moment(e.birthDate).format("DD/MM/YYYY")}
+                                <Box>
+                                  <img
+                                    src={e.productImage}
+                                    alt={e.productName}
+                                    style={{ maxWidth: "100px" }}
+                                  />
+                                </Box>
+                              </TableCell>
+                              <TableCell>{e.quantity}</TableCell>
+                              <TableCell>
+                                {numeral(e.price).format("0,")}
                               </TableCell>
                               <TableCell>
-                                {e.gender === 0
-                                  ? "Male"
-                                  : e.gender === 1
-                                  ? "Female"
-                                  : "Other"}
-                              </TableCell>
-                              <TableCell>
-                                {e.isLogin === 1 ? (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"green"}
-                                  >
-                                    Accept
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"error"}
-                                  >
-                                    Ignore
-                                  </Typography>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Box
-                                  display={"flex"}
-                                  flexDirection={"column"}
-                                  gap={2}
-                                >
+                                <Box display={"flex"} gap={1}>
                                   <Button
                                     variant="contained"
                                     onClick={() => handlePostDetail(e)}
                                     color="primary"
                                   >
-                                    Detail
+                                    <RemoveRedEyeIcon />
+                                  </Button>
+                                  <Button variant="contained">
+                                    <CreateIcon />
                                   </Button>
                                   <Button
                                     variant="contained"
-                                    onClick={() => handleChangeStatus(e)}
                                     color="error"
+                                    onClick={() =>
+                                      handleDeleteProduct(e.productId)
+                                    }
                                   >
-                                    Change Status
+                                    <DeleteIcon />
                                   </Button>
                                 </Box>
                               </TableCell>
@@ -510,7 +514,7 @@ function UsersManager() {
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
                       component="div"
-                      count={users?.length || 0}
+                      count={data?.length || 0}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       onPageChange={handleChangePage}
@@ -527,4 +531,4 @@ function UsersManager() {
   );
 }
 
-export default UsersManager;
+export default LaptopsManager;

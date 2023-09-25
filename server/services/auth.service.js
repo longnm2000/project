@@ -38,6 +38,7 @@ module.exports.signIn = async (email, password) => {
   try {
     let findUser = await userService.findOneByEmail(email);
     let [rows] = findUser;
+    console.log([rows]);
     if (rows.length === 0) {
       return {
         status: 404,

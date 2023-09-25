@@ -14,16 +14,30 @@ module.exports.findAll = async (req, res) => {
 };
 
 module.exports.findOneById = async (req, res) => {
-  let { id } = req.params;
-  console.log(id);
+  const { id } = req.params;
   try {
     const [product] = await productServices.findOneById(id);
     const [images] = await productServices.findProductImages(id);
-    console.log(images, product);
     res.status(200).json({
       status: "success",
       product: product[0],
       images,
+    });
+  } catch (error) {
+    res.json({
+      error,
+    });
+  }
+};
+
+module.exports.deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    await productServices.deleteProduct(id);
+    res.status(200).json({
+      status: "success",
+      message: `Delete the product has productId = ${id} successfully`,
     });
   } catch (error) {
     res.json({
