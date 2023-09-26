@@ -82,6 +82,7 @@ function Cart() {
       (item) => decoded?.data.id === item.userId
     );
     try {
+      console.log(orderDetailsArray);
       const response = await axiosInstance.post(
         "http://localhost:8080/api/v1/orders",
         {
@@ -90,6 +91,7 @@ function Cart() {
           orderDetails: orderDetailsArray,
         }
       );
+      console.log(response.data);
       if (response.status === 201) {
         Swal.fire({
           icon: "success",
@@ -98,6 +100,12 @@ function Cart() {
         }).then(() => {
           setCartItems([]);
           localStorage.removeItem("cartItems");
+        });
+      } else if (response.status === 203) {
+        Swal.fire({
+          icon: "error",
+          title: "Tài khoản đã bị khoá",
+          timer: 2000,
         });
       }
     } catch (error) {

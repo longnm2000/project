@@ -11,6 +11,12 @@ import UsersManager from "./pages/admin/UsersManager/UsersManager";
 import OrdersManager from "./pages/admin/OrderManager/OrderManager";
 import LaptopsManager from "./pages/admin/LaptopsManager/LaptopsManager";
 import AddProduct from "./pages/admin/AddProduct/AddProduct";
+import BranchesManager from "./pages/admin/BranchesManager/BranchesManager";
+import UpdateBranch from "./pages/admin/UpdateBranch/UpdateBranch";
+import UpdateProduct from "./pages/admin/UpdateProduct/UpdateProduct";
+import PrivateAdminRoutes from "./components/PrivateAdminRoutes/PrivateAdminRoutes";
+import OrderHistory from "./pages/user/OrderHistory/OrderHistory";
+
 function App() {
   const navigate = useNavigate();
   const scrollToTop = () => {
@@ -27,12 +33,21 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/laptop/:id" element={<Detail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="*" element={<NotFound />} />
+        <Route path="/history" element={<OrderHistory />} />
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/users" element={<UsersManager />} />
-        <Route path="/admin/orders" element={<OrdersManager />} />
-        <Route path="/admin/laptops" element={<LaptopsManager />} />
-        <Route path="/admin/laptops/add" element={<AddProduct />} />
+        <Route element={<PrivateAdminRoutes />}>
+          <Route path="/admin/users" element={<UsersManager />} />
+          <Route path="/admin/orders" element={<OrdersManager />} />
+          <Route path="/admin/laptops" element={<LaptopsManager />} />
+          <Route path="/admin/laptops/add" element={<AddProduct />} />
+          <Route path="/admin/laptops/:id/update" element={<UpdateProduct />} />
+          <Route path="/admin/manufacturers" element={<BranchesManager />} />
+          <Route
+            path="/admin/manufacturers/:id/update"
+            element={<UpdateBranch />}
+          />
+        </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

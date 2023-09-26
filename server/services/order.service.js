@@ -36,6 +36,14 @@ module.exports.findAllOrders = () => {
     `SELECT o.*, u.firstName,u.lastName FROM orders o INNER JOIN users u ON o.userId = u.userId  order by status asc, orderDate desc`
   );
 };
+
+module.exports.findAllOrdersByUserId = (id) => {
+  return db.execute(
+    `SELECT * FROM orders WHERE userId = ? order by status asc, orderDate desc`,
+    [id]
+  );
+};
+
 module.exports.findOneOrderDetail = (id) => {
   return db.execute(
     `SELECT

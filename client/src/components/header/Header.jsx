@@ -12,7 +12,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -239,9 +239,14 @@ function Header() {
                   <Typography textAlign="center">Đăng nhập</Typography>
                 </MenuItem>
               ) : (
-                <MenuItem onClick={handleLogOut}>
-                  <Typography textAlign="center">Đăng xuất</Typography>
-                </MenuItem>
+                <Box>
+                  <MenuItem component={NavLink} to={"/history"}>
+                    <Typography>Lịch sử mua hàng</Typography>
+                  </MenuItem>
+                  <MenuItem onClick={handleLogOut}>
+                    <Typography textAlign="center">Đăng xuất</Typography>
+                  </MenuItem>
+                </Box>
               )}
             </Menu>
           </Box>

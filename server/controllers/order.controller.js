@@ -82,3 +82,14 @@ module.exports.updateStatus = async (req, res) => {
     });
   }
 };
+
+module.exports.findAllOrdersByUserId = async (req, res) => {
+  let { id } = req.params;
+  try {
+    let [result] = await orderServices.findAllOrdersByUserId(id);
+    res.status(200).json({
+      status: "success",
+      orders: result,
+    });
+  } catch (error) {}
+};

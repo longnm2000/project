@@ -37,6 +37,14 @@ export const mainListItems = (
         <ListItemText primary="Laptops" />
       </ListItemButton>
     </NavLink>
+    <NavLink to={"/admin/manufacturers"}>
+      <ListItemButton>
+        <ListItemIcon>
+          <SourceIcon />
+        </ListItemIcon>
+        <ListItemText primary="Manufacturers" />
+      </ListItemButton>
+    </NavLink>
   </React.Fragment>
 );
 

@@ -16,7 +16,7 @@ import { Grid } from "@mui/material";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../../../firebase";
 import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const defaultTheme = createTheme();
 
@@ -62,8 +62,10 @@ const schema = yup.object().shape({
     .positive(),
 });
 
-export default function AddProduct() {
+export default function UpdateProduct() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [data, setData] = useState(null);
   const [manufacturer, setManufacturer] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrlAvatar, setImageUrlAvatar] = useState(null);
@@ -147,14 +149,14 @@ export default function AddProduct() {
       return;
     } else {
       if (!!imageUrlAvatar) {
-        const newProduct = { ...data, avatar: imageUrlAvatar, optionalImages };
-        console.log(newProduct);
+        const updateProduct = { ...data, avatar: imageUrlAvatar };
+        console.log(updateProduct);
         try {
-          let response = await axios.post(
-            "http://localhost:8080/api/v1/laptops",
-            newProduct
+          let response = await axios.patch(
+            `http://localhost:8080/api/v1/laptops/${id}`,
+            updateProduct
           );
-          if (response.status === 201) {
+          if (response.status === 200) {
             Swal.fire({
               icon: "success",
               title: "Add product successfully",
@@ -173,14 +175,19 @@ export default function AddProduct() {
   };
   const fetchData = async () => {
     const response = await axios.get(
+      `http://localhost:8080/api/v1/laptops/${id}`
+    );
+    const response2 = await axios.get(
       "http://localhost:8080/api/v1/laptops/manufacturers"
     );
-    setManufacturer(response.data.manufacturers);
+    setManufacturer(response2.data.manufacturers);
+    setData(response.data);
   };
+
   useEffect(() => {
     fetchData();
   }, []);
-
+  console.log(data);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container>
@@ -481,6 +488,9 @@ export default function AddProduct() {
             <Box>
               <Typography variant="h4">Avatar</Typography>
               <input type="file" onChange={handleAvatarUpload} />
+              {optionalImages && (
+                <img src={optionalImages} alt="" width={"350px"} />
+              )}
 
               {/* {imageUrlAvatar ? (
                 <img src={imageUrlAvatar} alt="" width={"350px"} />
@@ -488,7 +498,7 @@ export default function AddProduct() {
                 <></>
               )} */}
             </Box>
-            <Box>
+            {/* <Box>
               <Typography variant="h4">Optional Images</Typography>
               <input
                 type="file"
@@ -497,7 +507,7 @@ export default function AddProduct() {
                 multiple
                 onChange={handleMultipleImageUpload}
               />
-            </Box>
+            </Box> */}
             <Button
               type="submit"
               fullWidth

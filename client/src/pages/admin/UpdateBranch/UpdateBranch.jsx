@@ -21,7 +21,7 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 // import Chart from './Chart';
 // import Deposits from "../../../components/Deposits/Deposits";
 // import Orders from "../../../components/Orders/Orders";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -51,6 +51,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useForm, Controller } from "react-hook-form";
+import TextField from "@mui/material/TextField";
+import AddIcon from "@mui/icons-material/Add";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import { useParams } from "react-router-dom";
+import UndoIcon from "@mui/icons-material/Undo";
 
 const drawerWidth = 240;
 
@@ -101,13 +111,20 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-function UsersManager() {
+const schema = yup.object().shape({
+  name: yup.string().required("Name cannot be blank"),
+});
+
+function UpdateBranch() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [manufacturerName, setManufacturerName] = useState("");
+
   const [open, setOpen] = useState(true);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [userName, setUserName] = useState("");
   let decoded = null;
-  if (!!localStorage.getItem("admin_token")) {
+  if (localStorage.getItem("admin_token")) {
     decoded = jwtDecode(localStorage.getItem("admin_token"));
   }
   const toggleDrawer = () => {
@@ -117,57 +134,27 @@ function UsersManager() {
     localStorage.removeItem("admin_token");
     navigate("/admin/login");
   };
-
-  const [users, setUsers] = useState(null);
+  const [update, setUpdate] = useState("");
+  const [data, setData] = useState(null);
   const fetchData = async () => {
     await axios
-      .get(`http://localhost:8080/api/v1/users`)
-      .then((res) => setUsers(res.data.users))
+      .get(`http://localhost:8080/api/v1/laptops/manufacturers/${id}`)
+      .then((res) => setData(res.data.manufacturer))
       .catch((err) => console.log(err));
   };
 
   useEffect(() => {
     fetchData();
     if (!!decoded) {
-      setUserName(decoded?.data?.name);
+      setUserName(decoded.data.name);
     }
   }, []);
 
-  const handleChangeStatus = async (user) => {
-    await axios
-      .patch(`http://localhost:8080/api/v1/users/${user.userId}`, {
-        isLogin: user.isLogin === 1 ? 0 : 1,
-      })
-      .then((res) => {
-        fetchData();
-        console.log(res.data);
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const [selectedUser, setSelectedUser] = useState(null);
-  const handlePostDetail = (user) => {
-    setSelectedUser(user);
-    handleShow();
-  };
-
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // Pagination change event handlers
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  useEffect(() => {
+    if (data) {
+      setManufacturerName(data[0].name);
+    }
+  }, [data]);
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -223,82 +210,34 @@ function UsersManager() {
     };
   }
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.patch(
+        `http://localhost:8080/api/v1/laptops/manufacturers/${id}`,
+        { name: update }
+      );
+      if (response.status === 200) {
+        Swal.fire({
+          icon: "success",
+          title: "Update successfully",
+          timer: 2000,
+        });
+        navigate("/admin/manufacturers");
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: error,
+      });
+    }
+  };
   return (
     <ThemeProvider theme={defaultTheme}>
       <Helmet>
-        <title>Users Manager</title>
+        <title>Update Manufacturer</title>
       </Helmet>
-      <>
-        {/* <Modal show={show} onHide={handleClose} className="py-5">
-          <Modal.Header closeButton>
-            <Modal.Title>User Detail</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {!!selectedUser ? (
-              <div>
-                <p>ID: {selectedUser.user_id}</p>
-                <p>Name: {selectedUser.name}</p>
-                <p>Email: {selectedUser.email}</p>
-                <p>Birthday: {selectedUser.birthday}</p>
-                <p>
-                  Gender:{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </p>
-              </div>
-            ) : (
-              <></>
-            )}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-        <Dialog open={show} onClose={handleClose}>
-          <DialogTitle>User Detail</DialogTitle>
-          <DialogContent>
-            {!!selectedUser ? (
-              <div>
-                <DialogContentText>
-                  <b>ID:</b> {selectedUser.userId}
-                </DialogContentText>
-                <DialogContentText>
-                  <b> Name:</b> {selectedUser.firstName} {selectedUser.lastName}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Email:</b> {selectedUser.email}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Birthday:</b> {selectedUser.birthday}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Gender:</b>{" "}
-                  {selectedUser.gender === 0
-                    ? "Male"
-                    : +selectedUser.gender === 1
-                    ? "Female"
-                    : "Other"}
-                </DialogContentText>
-                <DialogContentText>
-                  <b>Phone Number:</b> {selectedUser.phone}
-                </DialogContentText>
-              </div>
-            ) : (
-              <></>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button variant="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
+
       <Box sx={{ display: "flex" }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
@@ -410,94 +349,45 @@ function UsersManager() {
                   className="overflow-x-auto bg-white"
                 >
                   <React.Fragment>
-                    <Title>Users</Title>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>#</TableCell>
-                          <TableCell>First Name</TableCell>
-                          <TableCell>Last Name</TableCell>
-                          <TableCell>Email</TableCell>
-                          <TableCell>Birthday</TableCell>
-                          <TableCell>gender</TableCell>
-                          <TableCell>Status</TableCell>
-                          <TableCell>Action</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {users
-                          ?.slice(
-                            page * rowsPerPage,
-                            page * rowsPerPage + rowsPerPage
-                          )
-                          .map((e, i) => (
-                            <TableRow key={i}>
-                              <TableCell>{i + 1}</TableCell>
-                              <TableCell>{e.firstName}</TableCell>
-                              <TableCell>{e.lastName}</TableCell>
-                              <TableCell>{e.email}</TableCell>
-                              <TableCell>
-                                {moment(e.birthDate).format("DD/MM/YYYY")}
-                              </TableCell>
-                              <TableCell>
-                                {e.gender === 0
-                                  ? "Male"
-                                  : e.gender === 1
-                                  ? "Female"
-                                  : "Other"}
-                              </TableCell>
-                              <TableCell>
-                                {e.isLogin === 1 ? (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"green"}
-                                  >
-                                    Accept
-                                  </Typography>
-                                ) : (
-                                  <Typography
-                                    fontWeight={"bold"}
-                                    color={"error"}
-                                  >
-                                    Ignore
-                                  </Typography>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                <Box
-                                  display={"flex"}
-                                  flexDirection={"column"}
-                                  gap={2}
-                                >
-                                  <Button
-                                    variant="contained"
-                                    onClick={() => handlePostDetail(e)}
-                                    color="primary"
-                                  >
-                                    Detail
-                                  </Button>
-                                  <Button
-                                    variant="contained"
-                                    onClick={() => handleChangeStatus(e)}
-                                    color="error"
-                                  >
-                                    Change Status
-                                  </Button>
-                                </Box>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      component="div"
-                      count={users?.length || 0}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
+                    <Title>Update Manufacturer</Title>
+                    <Box>
+                      <Button
+                        variant="contained"
+                        component={NavLink}
+                        to={"/admin/manufacturers"}
+                      >
+                        <UndoIcon />
+                      </Button>
+                    </Box>
+                    <Box
+                      component="form"
+                      noValidate
+                      onSubmit={handleSubmit}
+                      sx={{ mt: 1 }}
+                      padding={2}
+                    >
+                      <label>Name</label>
+                      <input
+                        type="text"
+                        defaultValue={manufacturerName}
+                        onChange={(e) => setUpdate(e.target.value)}
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          borderRadius: "5px",
+                          outline: "none",
+                        }}
+                      />
+
+                      <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                      >
+                        Update
+                      </Button>
+                    </Box>
                   </React.Fragment>
                 </Paper>
               </Grid>
@@ -509,4 +399,4 @@ function UsersManager() {
   );
 }
 
-export default UsersManager;
+export default UpdateBranch;

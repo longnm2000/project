@@ -12,7 +12,7 @@ module.exports.isLogin = async (req, res, next) => {
       res.locals.middlewareData = id;
       next();
     } else {
-      res.json({
+      res.status(203).json({
         message: "Unauthorized",
       });
     }

@@ -150,11 +150,11 @@ function Detail() {
                     </ListItem>
                     <ListItem>
                       <ListItemText
-                        primary={`RAM: ${data?.product.ram} ${data?.product.ramType}`}
+                        primary={`RAM: ${data?.product.ram} GB ${data?.product.ramType}`}
                       />
                     </ListItem>
                     <ListItem>
-                      <ListItemText primary={`SSD: ${data?.product.ssd}`} />
+                      <ListItemText primary={`SSD: ${data?.product.ssd} GB`} />
                     </ListItem>
                     <ListItem>
                       <ListItemText
@@ -163,7 +163,7 @@ function Detail() {
                     </ListItem>
                     <ListItem>
                       <ListItemText
-                        primary={"Cân nặng: " + data?.product.weight}
+                        primary={"Cân nặng: " + data?.product.weight + " Kg"}
                       />
                     </ListItem>
                   </List>

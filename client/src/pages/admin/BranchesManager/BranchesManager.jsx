@@ -17,34 +17,28 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 // import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../../components/ListItems/listItems";
-// import FacebookIcon from "@mui/icons-material/Facebook";
+import FacebookIcon from "@mui/icons-material/Facebook";
 // import Chart from './Chart';
 // import Deposits from "../../../components/Deposits/Deposits";
 // import Orders from "../../../components/Orders/Orders";
-import { useNavigate } from "react-router-dom";
-
-// import Dropdown from "react-bootstrap/Dropdown";
-// import DropdownButton from "react-bootstrap/DropdownButton";
-
+import { NavLink, useNavigate } from "react-router-dom";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Title from "../../../components/Title/Title";
-
+import { Helmet } from "react-helmet";
+// import Dropdown from "react-bootstrap/Dropdown";
+// import DropdownButton from "react-bootstrap/DropdownButton";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 // import Button from "react-bootstrap/Button";
 // import Modal from "react-bootstrap/Modal";
-
-import { Helmet } from "react-helmet";
+// import { DataGrid } from "@mui/x-data-grid";
 import TablePagination from "@mui/material/TablePagination";
 import jwtDecode from "jwt-decode";
-// import { Col, Row } from "react-bootstrap";
-import numeral from "numeral";
-// import Form from "react-bootstrap/Form";
-
+import moment from "moment";
 import Menu from "@mui/material/Menu";
 import Tooltip from "@mui/material/Tooltip";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -57,8 +51,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogActions from "@mui/material/DialogActions";
-import Select from "@mui/material/Select";
-import moment from "moment";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useForm, Controller } from "react-hook-form";
+import TextField from "@mui/material/TextField";
+import AddIcon from "@mui/icons-material/Add";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
 
 const drawerWidth = 240;
 
@@ -109,61 +109,58 @@ const Drawer = styled(MuiDrawer, {
 // TODO remove, this demo shouldn't need to reset the theme.
 const defaultTheme = createTheme();
 
-export default function OrdersManager() {
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+const schema = yup.object().shape({
+  name: yup.string().required("Name cannot be blank"),
+});
 
+function BranchesManager() {
+  const navigate = useNavigate();
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const [open, setOpen] = useState(true);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [userName, setUserName] = useState("");
   let decoded = null;
   if (localStorage.getItem("admin_token")) {
     decoded = jwtDecode(localStorage.getItem("admin_token"));
   }
-
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
   };
   const handleExit = () => {
-    localStorage.removeItem("admin");
-    navigate("/admin/login-admin");
+    localStorage.removeItem("admin_token");
+    navigate("/admin/login");
   };
 
-  const [orders, setOrders] = useState(null);
-  const [selectedOrderStatus, setSelectedOrderStatus] = useState(0);
-
+  const [data, setData] = useState(null);
   const fetchData = async () => {
     await axios
-      .get("http://localhost:8080/api/v1/orders")
-      .then((res) => setOrders(res.data.orders))
-      .catch((error) => console.log(error));
-  };
-
-  const loadName = (decoded) => {
-    if (!!decoded) {
-      setUserName(decoded.data.name);
-    }
+      .get(`http://localhost:8080/api/v1/laptops/manufacturers`)
+      .then((res) => setData(res.data.manufacturers))
+      .catch((err) => console.log(err));
   };
 
   useEffect(() => {
     fetchData();
-    loadName(decoded);
+    if (!!decoded) {
+      setUserName(decoded.data.name);
+    }
   }, []);
 
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [selectedOrderDetail, setSelectedOrderDetail] = useState(null);
+  const [show, setShow] = useState(false);
 
-  const handleOrderDetail = async (order) => {
-    setSelectedOrder(order);
-    await axios
-      .get(`http://localhost:8080/api/v1/orders/${order.orderId}`)
-      .then((res) => setSelectedOrderDetail(res.data.orderDetail))
-      .catch((error) => console.log(error));
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const [selectedBranch, setSelectedBranch] = useState(null);
+  const handlePostDetail = (user) => {
     handleShow();
   };
-  console.log(selectedOrderDetail);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -176,29 +173,6 @@ export default function OrdersManager() {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleChange = (value, id) => {
-    Swal.fire({
-      title: "Are you sure?",
-
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        axios
-          .patch(`http://localhost:8080/api/v1/orders/${id}`, { value: value })
-          .then((res) => {
-            if (res.status === 200) {
-              Swal.fire({ icon: "success", title: "success", timer: 2000 });
-              fetchData();
-            }
-          })
-          .catch((error) => console.log(error));
-      }
-    });
   };
 
   const handleOpenUserMenu = (event) => {
@@ -254,117 +228,103 @@ export default function OrdersManager() {
       children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
     };
   }
-  console.log(selectedOrderDetail);
+
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "If you delete this manufacturer, all of its products will be deleted",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`http://localhost:8080/api/v1/laptops/manufacturers/${id}`)
+          .then((response) => {
+            if (response.status === 200) {
+              Swal.fire({
+                icon: "success",
+                timer: 2000,
+                title: "Deleted!",
+              });
+              fetchData();
+            }
+          })
+          .catch((error) => {
+            Swal.fire({
+              icon: "error",
+              title: error,
+            });
+          });
+      }
+    });
+  };
+  const onSubmit = async (data) => {
+    handleClose();
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/v1/laptops/manufacturers",
+        data
+      );
+      if ((response.status = 201)) {
+        Swal.fire({
+          icon: "success",
+          title: "Add success",
+          timer: 2000,
+        });
+        fetchData();
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: error,
+      });
+    }
+  };
 
   return (
     <ThemeProvider theme={defaultTheme}>
       <Helmet>
-        <title>Orders Manager</title>
+        <title>Manufacturers Manager</title>
       </Helmet>
-      <Dialog
-        open={show}
-        onClose={handleClose}
-        fullScreen
-        aria-labelledby="contained-modal-title-vcenter"
-        PaperProps={{
-          sx: {
-            borderRadius: "8px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            backgroundColor: "#f0f0f0",
-            borderBottom: "1px solid #ddd",
-            padding: "16px",
-          }}
+      <Dialog open={show} onClose={handleClose}>
+        <DialogTitle>Add Manufacturer</DialogTitle>
+        <Box
+          component="form"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+          sx={{ mt: 1 }}
+          padding={2}
         >
-          Order Detail
-        </DialogTitle>
-        <DialogContent sx={{ padding: "16px" }}>
-          {selectedOrder && (
-            <>
-              <Typography variant="subtitle1" gutterBottom>
-                Order ID: {selectedOrder.orderId}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                User ID: {selectedOrder.userId}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                User Name: {selectedOrder.lastName} {selectedOrder.firstName}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                Order Date: {selectedOrder.order_date}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                Total Amount: {numeral(selectedOrder.totalAmount).format("0,")}{" "}
-                đ
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                Shipping Address: {selectedOrder.shippingAddress}
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                Order Status:{" "}
-                {selectedOrder.status === 0
-                  ? "Pending"
-                  : selectedOrder.status === 1
-                  ? "Delivery"
-                  : selectedOrder.status === 2
-                  ? "Completed"
-                  : "Canceled"}
-              </Typography>
-              <Typography variant="h6" gutterBottom>
-                Products:
-              </Typography>
-              {selectedOrderDetail?.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt=""
-                    width="80px"
-                    height="auto"
-                    style={{ marginRight: "16px" }}
-                  />
-                  <div>
-                    <Typography variant="subtitle1" className="fw-bold">
-                      {item.productName}
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">CPU:</span> {item.cpu} GB
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">GPU:</span> {item.card} GB
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">RAM:</span> {item.ram} GB
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">SSD:</span> {item.ssd} GB
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">Screen:</span> {item.screenSize}{" "}
-                      inches {item.screenResolution} {item.refeshRate} Hz{" "}
-                    </Typography>
-                    <Typography variant="body2">
-                      <span className="fw-bold">Quantity:</span> {item.quantity}
-                    </Typography>
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
-        </DialogContent>
+          <Controller
+            name="name"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                margin="normal"
+                label="Name"
+                error={!!errors.name}
+                helperText={errors?.name?.message}
+              />
+            )}
+          />
 
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Add
+          </Button>
+        </Box>
         <DialogActions>
-          <Button variant="contained" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>
         </DialogActions>
@@ -480,83 +440,55 @@ export default function OrdersManager() {
                   className="overflow-x-auto bg-white"
                 >
                   <React.Fragment>
-                    <Title>Orders</Title>
+                    <Title>Manufacturers</Title>
+                    <Box>
+                      <Button
+                        variant="contained"
+                        onClick={() => handlePostDetail()}
+                        color="primary"
+                      >
+                        <AddIcon />
+                      </Button>
+                    </Box>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
                           <TableCell>#</TableCell>
-                          <TableCell>Order Id</TableCell>
-                          <TableCell>User Id</TableCell>
-                          <TableCell>User Name</TableCell>
-                          <TableCell>Order Time</TableCell>
-                          <TableCell>Total Amount (VND)</TableCell>
-                          <TableCell>Order Status</TableCell>
+                          <TableCell>Manufacturer Id</TableCell>
+                          <TableCell>Name</TableCell>
                           <TableCell>Action</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {orders
+                        {data
                           ?.slice(
                             page * rowsPerPage,
                             page * rowsPerPage + rowsPerPage
                           )
-                          .map((order, index) => (
-                            <TableRow key={index}>
-                              <TableCell>{index + 1}</TableCell>
-                              <TableCell>{order.orderId}</TableCell>
-                              <TableCell>{order.userId}</TableCell>
+                          .map((e, i) => (
+                            <TableRow key={i}>
+                              <TableCell>{i + 1}</TableCell>
+                              <TableCell>{e.manufacturerId}</TableCell>
+                              <TableCell>{e.name}</TableCell>
                               <TableCell>
-                                {order.lastName} {order.firstName}
-                              </TableCell>
-                              <TableCell>
-                                {moment(order.orderDate).format(
-                                  "DD/MM/YYYY HH:mm:ss"
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {numeral(order.totalAmount).format("0,")}
-                              </TableCell>
-                              <TableCell>
-                                {order.status === 0
-                                  ? "Pending"
-                                  : order.status === 1
-                                  ? "Delivery"
-                                  : order.status === 2
-                                  ? "Completed"
-                                  : "Canceled"}
-                              </TableCell>
-                              <TableCell>
-                                <Box
-                                  display={"flex"}
-                                  flexDirection={"column"}
-                                  gap={1}
-                                >
+                                <Box display={"flex"} gap={1}>
                                   <Button
                                     variant="contained"
-                                    onClick={() => handleOrderDetail(order)}
-                                    className="w-100 mb-2"
+                                    color="success"
+                                    component={NavLink}
+                                    to={`/admin/manufacturers/${e.manufacturerId}/update`}
                                   >
-                                    Detail
+                                    <ModeEditIcon />
                                   </Button>
-
-                                  <Select
-                                    size="small"
-                                    value={order.status}
-                                    disabled={
-                                      order.status === 3 || order.status === 2
-                                    }
-                                    onChange={(e) =>
-                                      handleChange(
-                                        e.target.value,
-                                        order.orderId
-                                      )
+                                  <Button
+                                    variant="contained"
+                                    color="error"
+                                    onClick={() =>
+                                      handleDelete(e.manufacturerId)
                                     }
                                   >
-                                    <MenuItem value={0}>Pending</MenuItem>
-                                    <MenuItem value={1}>Delivery</MenuItem>
-                                    <MenuItem value={2}>Completed</MenuItem>
-                                    <MenuItem value={3}>Canceled</MenuItem>
-                                  </Select>
+                                    <DeleteIcon />
+                                  </Button>
                                 </Box>
                               </TableCell>
                             </TableRow>
@@ -566,7 +498,7 @@ export default function OrdersManager() {
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
                       component="div"
-                      count={orders?.length || 0}
+                      count={data?.length || 0}
                       rowsPerPage={rowsPerPage}
                       page={page}
                       onPageChange={handleChangePage}
@@ -582,3 +514,5 @@ export default function OrdersManager() {
     </ThemeProvider>
   );
 }
+
+export default BranchesManager;

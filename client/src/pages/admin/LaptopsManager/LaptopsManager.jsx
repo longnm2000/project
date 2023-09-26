@@ -21,7 +21,7 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 // import Chart from './Chart';
 // import Deposits from "../../../components/Deposits/Deposits";
 // import Orders from "../../../components/Orders/Orders";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -286,6 +286,9 @@ function LaptopsManager() {
                 <b> Name:</b> {selectLaptop?.product?.name}
               </DialogContentText>
               <DialogContentText>
+                <b> Manufacturer:</b> {selectLaptop?.product?.manufacturerName}
+              </DialogContentText>
+              <DialogContentText>
                 <b>CPU:</b> {selectLaptop?.product?.cpu}
               </DialogContentText>
               <DialogContentText>
@@ -301,7 +304,11 @@ function LaptopsManager() {
               <DialogContentText>
                 <b>Screen:</b> {selectLaptop?.product?.screenSize} inches{" "}
                 {selectLaptop?.product?.screenResolution}{" "}
+                {selectLaptop?.product?.screenType}{" "}
                 {selectLaptop?.product?.refeshRate} Hz
+              </DialogContentText>
+              <DialogContentText>
+                <b>Weight:</b> {selectLaptop?.product?.weight} Kg
               </DialogContentText>
               <DialogContentText>
                 <b>Quantity:</b> {selectLaptop?.product?.quantity}
@@ -446,7 +453,11 @@ function LaptopsManager() {
                   <React.Fragment>
                     <Title>Laptops</Title>
                     <Box>
-                      <Button variant="contained">
+                      <Button
+                        variant="contained"
+                        component={NavLink}
+                        to={"/admin/laptops/add"}
+                      >
                         <AddIcon />{" "}
                       </Button>
                     </Box>
@@ -456,7 +467,7 @@ function LaptopsManager() {
                           <TableCell>#</TableCell>
                           <TableCell>Name</TableCell>
                           <TableCell>Image</TableCell>
-                          <TableCell>Quantity</TableCell>
+                          <TableCell>Manufacturer</TableCell>
                           <TableCell>Price</TableCell>
                           <TableCell>Action</TableCell>
                         </TableRow>
@@ -480,7 +491,7 @@ function LaptopsManager() {
                                   />
                                 </Box>
                               </TableCell>
-                              <TableCell>{e.quantity}</TableCell>
+                              <TableCell>{e.manufacturerName}</TableCell>
                               <TableCell>
                                 {numeral(e.price).format("0,")}
                               </TableCell>
@@ -493,7 +504,11 @@ function LaptopsManager() {
                                   >
                                     <RemoveRedEyeIcon />
                                   </Button>
-                                  <Button variant="contained">
+                                  <Button
+                                    variant="contained"
+                                    component={NavLink}
+                                    to={`/admin/laptops/${e.productId}/update`}
+                                  >
                                     <CreateIcon />
                                   </Button>
                                   <Button
